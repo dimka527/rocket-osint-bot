@@ -44,6 +44,13 @@ def start(message):
         types.KeyboardButton("📸 Фото"),
         types.KeyboardButton("ℹ️ Помощь")
     )
+    bot.send_message(
+        message.chat.id, 
+        "🛰️ *ROCKET OSINT BOT v3.7*\n\nВыбери действие:", 
+        parse_mode="Markdown", 
+        reply_markup=markup
+    )
+    )
     bot.send_message(message.chat.id, "🛰️ *ROCKET OSINT BOT v3.7*\n\nВыберите действие:", parse_mode="Markdown", reply_markup=markup)
 
 @bot.message_handler(func=lambda m: True)
