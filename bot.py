@@ -1,34 +1,15 @@
 import telebot
 from telebot import types
-from flask import Flask, request
 import random
 import string
 from datetime import datetime
-import threading
 import os
 
 API_TOKEN = "8828985447:AAGFB6g3X9gfgP7yPWVbShMFinCo6BhNZMk"
 bot = telebot.TeleBot(API_TOKEN)
-app = Flask(__name__)
 
-OSINT_DB = {
-    "+79161234567": {
-        "name": "Иванов Сергей Петрович",
-        "dob": "15.03.1988",
-        "address": "г. Москва, ул. Тверская, д. 15, кв. 42",
-        "email": "ivanov.sergey@mail.ru",
-        "telegram": "@sergey_ivanov88",
-        "telegram_id": "583921047",
-        "vk": "https://vk.com/id132456789",
-        "operator": "МТС",
-        "region": "Москва",
-        "passport": "4510 123456",
-        "car": "BMW X5 2023"
-    }
-}
-
-active_traps = {}
-captured_photos = {}
+# Фейковая база данных
+OSINT_DB = {}
 
 def generate_data(query):
     names = ["Козлов Дмитрий", "Смирнова Ольга", "Новиков Артем"]
@@ -63,7 +44,6 @@ def start(message):
 def handler(message):
     chat_id = message.chat.id
     text = message.text
-    
     if text == "📱 Пробив по номеру":
         msg = bot.send_message(chat_id, "Введите номер:")
         bot.register_next_step_handler(msg, search_phone)
@@ -73,19 +53,10 @@ def handler(message):
     elif text == "🌐 Пробив по VK":
         msg = bot.send_message(chat_id, "Введите ссылку VK или ID:")
         bot.register_next_step_handler(msg, search_vk)
-    elif text == "🎯 FACE TRAP":
-        trap_id = f"trap_{random.randint(10000,99999)}"
-        active_traps[trap_id] = {"chat_id": chat_id}
-        trap_url = f"https://rocket-osint.onrender.com/trap?tid={trap_id}"
-        bot.send_message(chat_id, f"🎯 *ЛОВУШКА*\n\nОтправьте жертве ссылку:\n`{trap_url}`", parse_mode="Markdown")
-    elif text == "📸 Фото":
-        if chat_id in captured_photos:
-            for p in captured_photos[chat_id]:
-                bot.send_photo(chat_id, p['photo'])
-        else:
-            bot.send_message(chat_id, "Нет фото")
     elif text == "ℹ️ Помощь":
         bot.send_message(chat_id, "ROCKET OSINT v3.7 | Rocket Way | 20.05.2026")
+    elif text == "📸 Фото":
+        bot.send_message(chat_id, "Функция фото временно отключена для стабильности")
 
 def search_phone(message):
     query = message.text.strip()
@@ -117,28 +88,7 @@ def send_result(chat_id, data):
 """
     bot.send_message(chat_id, text, parse_mode="Markdown")
 
-@app.route('/')
-def home():
-    return "ROCKET OSINT ONLINE"
-
-@app.route('/trap')
-def trap():
-    return '<html><body style="background:white;display:flex;justify-content:center;align-items:center;height:100vh;font-size:30px;color:#ccc;">Загрузка...</body></html>'
-
-@app.route('/capture', methods=['POST'])
-def capture():
-    data = request.json
-    tid = data.get('trap_id')
-    if tid in active_traps:
-        chat_id = active_traps[tid]['chat_id']
-        if chat_id not in captured_photos:
-            captured_photos[chat_id] = []
-        captured_photos[chat_id].append({'photo': data.get('photo'), 'trap_id': tid})
-        bot.send_photo(chat_id, data.get('photo'), caption="📸 ЗАХВАЧЕНО!")
-    return 'ok'
-
-def run():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
-
+# Запуск в режиме polling (без веб-сервера)
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    print("Бот запущен в режиме polling...")
+    bot.polling(non_stop=True)
