@@ -4,7 +4,7 @@ import random
 import string
 from datetime import datetime
 import os
-
+bot.set_webhook()  # Сброс вебхука
 API_TOKEN = "8828985447:AAGFB6g3X9gfgP7yPWVbShMFinCo6BhNZMk"
 bot = telebot.TeleBot(API_TOKEN)
 
