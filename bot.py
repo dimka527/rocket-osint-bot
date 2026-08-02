@@ -7,6 +7,24 @@ import os
 bot.set_webhook()  # Сброс вебхука
 API_TOKEN = "8828985447:AAGFB6g3X9gfgP7yPWVbShMFinCo6BhNZMk"
 bot = telebot.TeleBot(API_TOKEN)
+@bot.message_handler(commands=['start'])
+def start(message):
+    from telebot import types
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    markup.add(
+        types.KeyboardButton("📱 Пробив по номеру"),
+        types.KeyboardButton("✈️ Пробив по Telegram"),
+        types.KeyboardButton("🌐 Пробив по VK"),
+        types.KeyboardButton("🎯 FACE TRAP"),
+        types.KeyboardButton("📸 Фото"),
+        types.KeyboardButton("ℹ️ Помощь")
+    )
+    bot.send_message(
+        message.chat.id, 
+        "🛰️ *ROCKET OSINT BOT v3.7*\n\nВыбери действие:", 
+        parse_mode="Markdown", 
+        reply_markup=markup
+    )
 
 import requests
 
