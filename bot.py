@@ -8,9 +8,6 @@ bot.set_webhook()  # Сброс вебхука
 API_TOKEN = "8828985447:AAGFB6g3X9gfgP7yPWVbShMFinCo6BhNZMk"
 bot = telebot.TeleBot(API_TOKEN)
 
-# Фейковая база данных
-OSINT_DB = {}
-
 import requests
 
 # Новая функция для реального поиска по VK
