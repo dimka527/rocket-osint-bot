@@ -11,21 +11,27 @@ bot = telebot.TeleBot(API_TOKEN)
 # Фейковая база данных
 OSINT_DB = {}
 
-def generate_data(query):
-    names = ["Козлов Дмитрий", "Смирнова Ольга", "Новиков Артем"]
-    return {
-        "name": random.choice(names),
-        "dob": f"{random.randint(1985,2000)}-{random.randint(1,12):02d}-{random.randint(1,28):02d}",
-        "address": f"г. Москва, ул. Ленина, д. {random.randint(1,100)}",
-        "email": f"user{random.randint(1000,9999)}@mail.ru",
-        "telegram": f"@user_{random.randint(10000,99999)}",
-        "telegram_id": str(random.randint(100000000,999999999)),
-        "vk": f"https://vk.com/id{random.randint(100000000,999999999)}",
-        "operator": random.choice(["МТС","Билайн","МегаФон"]),
-        "region": random.choice(["Москва","СПб","Казань"]),
-        "passport": f"{random.randint(4000,5000)} {random.randint(100000,999999)}",
-        "car": f"{random.choice(['Toyota','Kia','BMW'])} {random.randint(2018,2024)}"
+import requests
+
+# Новая функция для реального поиска по VK
+def search_vk_real(query):
+    # Вставь сюда свой реальный токен (после того, как получишь его)
+    access_token = "ТВОЙ_ТОКЕН_ИЗ_VK" 
+    api_version = "5.131"
+    url = "https://api.vk.com/method/users.get"
+    
+    params = {
+        "user_ids": query,
+        "fields": "photo_200, city, bdate, status, followers_count, country",
+        "access_token": access_token,
+        "v": api_version
     }
+    
+    try:
+        response = requests.get(url, params=params).json()
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -70,8 +76,27 @@ def search_tg(message):
 
 def search_vk(message):
     query = message.text.strip()
-    data = generate_data(query)
-    send_result(message.chat.id, data)
+    data = search_vk_real(query)
+    
+    # Обработка ответа от VK
+    if "error" in data:
+        bot.send_message(message.chat.id, f"❌ Ошибка: {data['error']}")
+        return
+    
+    user = data.get("response", [{}])[0]
+    
+    # Формируем красивый ответ
+    result = f"""
+🟢 *РЕАЛЬНЫЙ РЕЗУЛЬТАТ ПО VK*
+👤 Имя: {user.get('first_name', 'Не указано')} {user.get('last_name', 'Не указано')}
+📅 ДР: {user.get('bdate', 'Не указано')}
+📍 Город: {user.get('city', {}).get('title', 'Не указано')}
+🌐 Страна: {user.get('country', {}).get('title', 'Не указано')}
+📸 Фото: {user.get('photo_200', 'Нет фото')}
+📊 Подписчики: {user.get('followers_count', '0')}
+📝 Статус: {user.get('status', 'Нет статуса')}
+"""
+    bot.send_message(message.chat.id, result, parse_mode="Markdown")
 
 def send_result(chat_id, data):
     text = f"""
